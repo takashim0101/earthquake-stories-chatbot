@@ -1,0 +1,38 @@
+# Node.js dependencies
+node_modules/
+
+# Python virtual environment
+venv/
+
+# Python compiled files
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+chatbot-api/.env
+
+# Generated data and logs specific to this project
+*.log
+*.png
+*.html
+*.json
+!package.json # package.jsonは含める
+!package-lock.json # package-lock.jsonは含める
+!analyzed_stories_evaluation_metrics.json # 評価メトリクスは含める
+!analyzed_stories.json # 分析済みストーリーは含める
+!geocoded_stories.json # ジオコード済みストーリーは含める
+
+# Raw data (large files)
+data/
+
+# Docker volumes
+photon_data/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db

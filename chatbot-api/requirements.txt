@@ -1,0 +1,10 @@
+matplotlib
+numpy
+scikit-learn
+pydantic
+google-generativeai
+langextract
+python-dotenv
+Flask
+requests
+folium
