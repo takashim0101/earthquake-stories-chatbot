@@ -199,3 +199,23 @@ body {
 .leaflet-container img {
     max-width: none !important;
 }
+
+/* Source Button Styling */
+.source-button {
+  font-size: 0.7rem; /* Smaller font */
+  padding: 3px 10px; /* Vertical and horizontal padding */
+  margin-top: 8px; /* Space above the button */
+  background-color: #6c757d; /* Bootstrap's secondary color */
+  color: white;
+  border: none;
+  border-radius: 12px; /* Pill-shaped */
+  cursor: pointer;
+  align-self: flex-start; /* Align to the left of the column */
+  opacity: 0.9;
+  transition: opacity 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+.source-button:hover {
+  opacity: 1;
+}

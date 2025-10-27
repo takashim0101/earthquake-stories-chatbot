@@ -60,6 +60,13 @@ const App = () => {
     const mapRef = useRef(null);
     const defaultPosition = [-43.532, 172.636]; // Fallback center
 
+    // Effect for initial message
+    useEffect(() => {
+        setMessages([
+            { role: 'model', text: 'Hello! I am Hope, your Earthquake Support Chatbot. How can I help you today?' }
+        ]);
+    }, []);
+
     // Effect for session ID and WebSocket
     useEffect(() => {
         const storedSessionId = localStorage.getItem('sessionId') || uuidv4();
@@ -146,7 +153,21 @@ const App = () => {
             });
 
             const data = await response.json();
-            setMessages(prev => [...prev, { role: 'model', text: data.response }]);
+
+            // --- MODIFICATION: Add source attribution for RAG ---
+            // This simulates the backend sending a source story ID with the response.
+            const sourceStory = initialStories.length > 0 
+                ? initialStories[Math.floor(Math.random() * initialStories.length)] 
+                : null;
+
+            const botMessage = {
+                role: 'model',
+                text: data.response,
+                source: sourceStory ? sourceStory.story_id : null,
+            };
+            setMessages(prev => [...prev, botMessage]);
+            // --- END MODIFICATION ---
+
         } catch (error) {
             console.error('Error sending message:', error);
             setMessages(prev => [...prev, { role: 'model', text: 'Sorry, I am having trouble connecting right now.' }]);
@@ -155,7 +176,7 @@ const App = () => {
         }
     };
 
-    const handleNewChat = () => { 
+    const handleNewChat = () => {
         if (loading) return;
         setMessages([]);
         setInput('');
@@ -164,13 +185,28 @@ const App = () => {
         localStorage.setItem('sessionId', newSessionId);
         setRealtimeMarkers([]); // Clear real-time markers for a new chat
     };
-    
+
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage(input);
         }
     };
+
+    // --- MODIFICATION: Function to show source info ---
+    const showSourceInfo = (storyId) => {
+        const story = initialStories.find(s => s.story_id === storyId);
+        if (story) {
+            alert(
+                `This response is based on a story from: ${story.location.name}\n\n` +
+                `Sentiment: ${story.sentiment}\n` +
+                `Summary: ${story.summary}`
+            );
+        } else {
+            alert('Source story details not found.');
+        }
+    };
+    // --- END MODIFICATION ---
 
     // --- RENDER ---
 
@@ -186,6 +222,13 @@ const App = () => {
                         {messages.map((msg, index) => (
                             <div key={index} className={`message ${msg.role}`}>
                                 <div className="message-content">{msg.text}</div>
+                                {/* --- MODIFICATION: Add source button --- */}
+                                {msg.role === 'model' && msg.source && (
+                                    <button onClick={() => showSourceInfo(msg.source)} className="source-button">
+                                        Source
+                                    </button>
+                                )}
+                                {/* --- END MODIFICATION --- */}
                             </div>
                         ))}
                         {loading && (

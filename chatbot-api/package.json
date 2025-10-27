@@ -1,7 +1,7 @@
 {
-  "name": "car-insurance-recommendation-backend",
+  "name": "chatbot-api",
   "version": "1.0.0",
-  "description": "Backend for AI Insurance Recommendation Application",
+  "description": "Backend for the Earthquake Stories Chatbot",
   "main": "server.js",
   "scripts": {
     "test": "vitest",
