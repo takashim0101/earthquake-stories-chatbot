@@ -340,7 +340,7 @@ This phase involves starting continuously running services and integrating with 
 | No. | Script / Service | Execution Command | Role and Result |
 |---|---|---|---|
 | 6. | server.js (Main API Server) | `npm run dev` | Core backend functionality. Reads `geocoded_stories.json` and provides data via `/api/stories`. Also handles RAG-based chatbot and Socket.IO (real-time communication) at the `/chat` endpoint. |
-| 7. | Frontend (React/Map) | `npm run dev` (in separate directory) | Final visualization. Receives data from the Node.js API and displays stories as markers on a map. Updates the map in real-time based on location mentions in the chat.
+| 7. | Frontend (React/Vite) | `npm run dev` (in separate directory) | Final visualization. Built with React and configured via `vite.config.js`, it receives data from the Node.js API and displays stories as markers on a map. Updates the map in real-time based on location mentions in the chat.
 
 ## 10. Setup
 
@@ -573,3 +573,5 @@ Once all backend services (Photon, AI Model, `geocode_api.py`, and the main Node
     *(Leave this terminal running.)*
 
 Once the server starts, open your web browser and navigate to the URL displayed in the terminal (usually `http://localhost:5173`) to access the application.
+
+**Note on Map Component:** The core map functionality is integrated directly into `src/App.jsx` for streamlined development. The file `src/MapComponent.jsx` exists but is not currently utilized in the main application flow.
