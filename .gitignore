@@ -14,9 +14,11 @@ chatbot-api/.env
 
 # Generated data and logs specific to this project
 *.log
-*.png
 *.html
 *.json
+*.png  # すべてのPNGファイルをデフォルトで無視する
+!chatbot-api/confusion_matrix.png  # ただし、このPNGはREADMEで使うので無視しない
+!chatbot-api/sentiment_distribution.png # このPNGもREADMEで使うので無視しない
 !package.json # package.jsonは含める
 !package-lock.json # package-lock.jsonは含める
 !analyzed_stories_evaluation_metrics.json # 評価メトリクスは含める
