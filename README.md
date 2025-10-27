@@ -2,11 +2,11 @@
 
 **Developed at the AI Hackathon (Christchurch, August 14-15, 2025) - [aihackathon.nz](https://aihackathon.nz/)**
 
-## 0. Project Motivation & Social Impact
+## 1. Project Motivation & Social Impact
 
 This project was born from a deep-seated concern for effective information dissemination and emotional support in disaster-stricken areas. Recognizing the challenges survivors face in sharing their experiences and the need for aid organizations to quickly understand community sentiment, we aimed to build a system that bridges this gap. By combining empathetic AI with real-time geographical visualization, this chatbot seeks to transform raw survivor stories into actionable insights, enabling more targeted and compassionate support. This approach demonstrates a commitment to leveraging technology for tangible social good, moving beyond mere technical implementation to address critical human needs.
 
-## 0.5. Non-Technical Summary: What is this Project About?
+## 2. Non-Technical Summary: What is this Project About?
 
 Imagine a friendly AI chatbot named "Hope" that helps people who have experienced earthquakes. This project creates the "brain" behind Hope.
 
@@ -20,14 +20,14 @@ Imagine a friendly AI chatbot named "Hope" that helps people who have experience
 **Why This Project Matters:**
 This project uses technology to turn raw experiences into helpful insights. It aims to provide emotional support to survivors and help aid organizations understand community needs better, making support more targeted and compassionate. It's about using AI for good, focusing on human needs in times of disaster.
 
-## 0.6. Data Source
+## 3. Data Source
 
 The textual data used in this project, located in the `data/` directory, consists of web-scraped social media narratives related to the Christchurch earthquakes. This dataset was originally provided as part of the DIGI405 course at the University of Canterbury.
 
 *   **Original Context**: The data was utilized in labs such as "DIGI405 - Lab 2.3 - Keywords" for corpus analysis.
 *   **Reference**: [https://github.com/polsci/corpus-analysis-labs/blob/main/DIGI405%20-%20Lab%202.3%20-%20Keywords.ipynb](https://github.com/polsci/corpus-analysis-labs/blob/main/DIGI405%20-%20Lab%202.3%20-%20Keywords.ipynb)
 
-## 1. Overview
+## 4. Overview
 
 This project is the backend for an empathetic AI chatbot designed to support earthquake survivors. It processes survivor stories, analyzes them for sentiment and topics, and provides data to a frontend application that offers a rich, interactive experience.
 
@@ -42,7 +42,7 @@ The backend has two primary functions to enable this:
 
 2.  **Static Map Generation**: As a preliminary step and for backend testing, it can generate a single `story_map.html` file to visualize all stories at once. This was used as a simple mock-up before building a full frontend.
 
-## 2. Architecture
+## 5. Architecture
 
 The backend has a **hybrid architecture**, leveraging both **Node.js** and **Python** for what they do best. This strategic choice reflects a full-stack development mindset, optimizing for performance, scalability, and developer efficiency across different domains.
 
@@ -127,7 +127,7 @@ Despite its complexity, this architecture is highly valuable for developing prof
 
 In conclusion, while this approach is challenging, it demonstrates that you are learning not just how to write code, but how to build and operate systems. This experience will be a significant asset in your future learning.
 
-## 3. Key Technical Feature: Prompt Engineering
+## 6. Key Technical Feature: Prompt Engineering
 
 This project heavily utilizes **Prompt Engineering** to control the Large Language Models (LLMs) and ensure the desired outputs for both data analysis and conversational chat.
 
@@ -155,7 +155,7 @@ Beyond prompt engineering, the behavior of the local LLM in LM Studio is further
     *   **What it is:** This parameter directly controls the maximum length of the LLM's generated response, typically measured in tokens or words.
     *   **Why `150` was chosen:** For the summarization task, a concise output is required. A limit of `150` tokens ensures that the generated summaries are brief and to the point, aligning with the project's goal of providing "concise summaries" for easy consumption (e.g., in map popups). This also helps manage computational resources and latency, especially when running LLMs locally.
 
-## 4. Evaluation Results: Conclusion
+## 7. Evaluation Results: Conclusion
 
 The project successfully achieved a stable, multi-class sentiment classification pipeline using a local LLM. The final performance was achieved by switching to a model with superior instruction-following capabilities (Mistral) and leveraging Few-Shot Learning. This rigorous evaluation process, including the use of a confusion matrix and comparison against ground truth, underscores a commitment to data quality and objective assessment of AI model performance.
 
@@ -268,7 +268,7 @@ Due to the time constraints of this hackathon analysis, the labels for evaluatio
 
 The initial configuration, **Mistral 7B Instruct v0.2 with Few-Shot Prompting**, delivered a reliable multi-class sentiment analysis at **33.3% accuracy** when summaries were not included in the prompt. After re-evaluating with summaries included, the final configuration delivers a reliable multi-class sentiment analysis at **36.7% accuracy**. Given the constraints of a local, small-scale LLM, this improved result marks a successful conclusion to the sentiment analysis improvement phase.
 
-## 5. Lessons Learned & Business Application
+## 8. Lessons Learned & Business Application
 
 This project was a rigorous exercise in strategic tool evaluation, system robustness, and outcome-driven iteration—skills directly translatable to advanced PR and corporate communication roles. It highlights a practical AI/ML development approach focused on real-world deployment and continuous improvement.
 
@@ -308,7 +308,7 @@ This project demonstrates practical expertise across several cutting-edge fields
 *   **AI System Optimization & Evaluation**: Rigorously benchmarking models, fine-tuning prompts, and using comprehensive metrics to optimize AI performance and reliability.
 *   **Microservices & Hybrid Architecture**: Designing and implementing robust systems using multiple technologies and distributed components for scalability and maintainability.
 
-## 6. My Role & Key Contributions
+## 9. My Role & Key Contributions
 
 This project was developed from the ground up, integrating diverse technologies to solve a complex social problem within a short timeframe, akin to a hackathon environment. My contributions spanned the entire stack and project lifecycle:
 
@@ -342,7 +342,7 @@ This phase involves starting continuously running services and integrating with 
 | 6. | server.js (Main API Server) | `npm run dev` | Core backend functionality. Reads `geocoded_stories.json` and provides data via `/api/stories`. Also handles RAG-based chatbot and Socket.IO (real-time communication) at the `/chat` endpoint. |
 | 7. | Frontend (React/Map) | `npm run dev` (in separate directory) | Final visualization. Receives data from the Node.js API and displays stories as markers on a map. Updates the map in real-time based on location mentions in the chat.
 
-## 7. Setup
+## 10. Setup
 
 ### Prerequisites
 
@@ -547,13 +547,13 @@ npm run dev
 
 With these two services running, the backend system is fully operational and ready to connect to the frontend.
 
-## 8. API and Events
+## 11. API and Events
 
 -   **`POST /chat`**: Endpoint for the chatbot interaction. When a message is received, the server searches for relevant topics within the message, retrieves summaries of related stories, and provides them as context to the conversational LLM.
 -   **`GET /api/stories`**: Serves the full `geocoded_stories.json` file for initial map rendering on the frontend.
 -   **`mapUpdate` (WebSocket Event)**: This is the special signal the server sends to the map. When you mention a location in chat, the server sends this signal with the location's details, telling the map to update instantly. Emitted by the server when a user mentions a location in chat. Provides real-time coordinates and story context to the frontend.
 
-## 9. Running the Frontend
+## 12. Running the Frontend
 
 Once all backend services (Photon, AI Model, `geocode_api.py`, and the main Node.js server) are fully operational, you can start the frontend application.
 
