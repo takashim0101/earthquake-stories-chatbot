@@ -55,10 +55,10 @@ This separation of concerns is common in modern web systems and demonstrates an 
 
 -   **`preprocess_data.py` (Data Analyzer & Evaluator)**: A build-step script that reads raw text stories and uses an LLM to perform **sentiment analysis and generate a concise summary** for each story, saving the output to `analyzed_stories.json`. Crucially, this script also **evaluates the AI's performance**. It compares the sentiment analysis results against a hardcoded `ground_truth` dataset (derived from the initial 30 manually labeled samples, which do not receive an LLM-generated summary by design) and outputs detailed metrics (Accuracy, Precision, Recall, F1-score) to the console. It also saves these results to `analyzed_stories_evaluation_metrics.json` and generates the following visualizations, demonstrating a strong focus on data quality and model evaluation:
 
-    ![Confusion Matrix](./confusion_matrix.png)
+    ![Confusion Matrix](./chatbot-api/confusion_matrix.png)
     *This chart shows how accurately the AI classified emotions. For example, it reveals tendencies for misclassification, such as mistaking a truly negative sentiment for a positive one.*
 
-    ![Sentiment Distribution](./sentiment_distribution.png)
+    ![Sentiment Distribution](./chatbot-api/sentiment_distribution.png)
     *This chart illustrates the distribution of stories across each sentiment category (positive, negative, neutral) as analyzed by the AI.*
 
 -   **`geocode_stories.py` (Bulk Geocoder)**: A build-step script that reads `analyzed_stories.json`, calls a local Photon server to get coordinates for each story, and saves the complete data as `geocoded_stories.json`. This file is served by the `/api/stories` endpoint.
@@ -69,7 +69,7 @@ This separation of concerns is common in modern web systems and demonstrates an 
 
     *To see the map, run the script and open the `story_map.html` file in your browser.*
 
-    ![Map Preview Placeholder](https://via.placeholder.com/600x400.png?text=Preview+of+story_map.html)
+    ![Map Preview](./chatbot-api/story_tell_chch_map.png)
 
 -   **Local Dependencies**: The system is designed to run locally without relying on paid external services. It requires a local AI model (via LM Studio/Ollama) and a local geocoding server (**Photon**). This choice reflects an MLOps/DevOps mindset, prioritizing cost-efficiency, data privacy, and operational robustness by minimizing external API dependencies.
 
@@ -143,6 +143,18 @@ To create the "Hope" persona and enable deep, context-aware conversation, the pr
 -   **Persona Assignment**: The system prompt explicitly defines the AI's role ("You are an empathetic AI assistant named Hope..."), its goals, and its constraints (e.g., not giving medical advice).
 -   **Dynamic Prompt Generation (RAG - Retrieval-Augmented Generation)**: This is a smart way the chatbot "Hope" uses information. Think of it like this: when you ask Hope a question, it first quickly "looks up" (Retrieval) all the past earthquake stories that are similar to what you're talking about. Then, it uses these real stories to help it "create" (Generation) a much more thoughtful and relevant answer. This means Hope doesn't just give generic replies; it uses the actual experiences of the community to make its conversations deeply empathetic and supportive.
 
+### 3. LM Studio Configuration Parameters
+
+Beyond prompt engineering, the behavior of the local LLM in LM Studio is further controlled by specific configuration parameters to ensure optimal performance for our tasks:
+
+-   **Temperature: `0`**
+    *   **What it is:** Temperature is a hyperparameter that controls the randomness of the LLM's output. A higher temperature (e.g., 0.8-1.0) makes the output more creative and diverse. A lower temperature (e.g., 0.1-0.5) makes the output more deterministic and focused.
+    *   **Why `0` was chosen:** For tasks like sentiment analysis and summarization in `preprocess_data.py`, consistency and reproducibility are paramount. Setting the temperature to `0` ensures that the LLM generates the most probable and consistent output, minimizing variability and making the data analysis results more reliable and trustworthy for evaluation.
+
+-   **Limit Response Length: `150`**
+    *   **What it is:** This parameter directly controls the maximum length of the LLM's generated response, typically measured in tokens or words.
+    *   **Why `150` was chosen:** For the summarization task, a concise output is required. A limit of `150` tokens ensures that the generated summaries are brief and to the point, aligning with the project's goal of providing "concise summaries" for easy consumption (e.g., in map popups). This also helps manage computational resources and latency, especially when running LLMs locally.
+
 ## 4. Evaluation Results: Conclusion
 
 The project successfully achieved a stable, multi-class sentiment classification pipeline using a local LLM. The final performance was achieved by switching to a model with superior instruction-following capabilities (Mistral) and leveraging Few-Shot Learning. This rigorous evaluation process, including the use of a confusion matrix and comparison against ground truth, underscores a commitment to data quality and objective assessment of AI model performance.
@@ -152,7 +164,7 @@ The project successfully achieved a stable, multi-class sentiment classification
 | 1 | Llama 3 8B | Zero-Shot | 23.3% | Low base accuracy; output was unstable initially. |
 | 2 | Gemma 3n E4B | Zero-Shot | 26.7% | Improved stability. |
 | 3 | Gemma 3n E4B | Few-Shot | 30.0% | **Critical Bias:** Model predicted only "positive." Few-Shot failed due to model-specific limitations. |
-| **4** | **Mistral 7B Instruct v0.2** | **Few-Shot** | **33.3%** | **Bias Resolved & Highest Accuracy:** Successfully classified all three categories (positive, neutral, negative). This validation confirms the final model/prompt configuration is robust and reliable for the target task. |
+| **4** | **Mistral 7B Instruct v0.2** | **Few-Shot** | **36.7%** | **Bias Resolved & Highest Accuracy (with summaries):** Successfully classified all three categories (positive, neutral, negative). This validation confirms the final model/prompt configuration is robust and reliable for the target task. |
 
 ### Detailed Sentiment Analysis Evaluation (LM Studio)
 
@@ -254,7 +266,7 @@ Due to the time constraints of this hackathon analysis, the labels for evaluatio
 
 ### Conclusion on Sentiment Analysis
 
-The final configuration, **Mistral 7B Instruct v0.2 with Few-Shot Prompting**, delivers a reliable multi-class sentiment analysis at **33.3% accuracy**. Given the constraints of a local, small-scale LLM, this result marks a successful conclusion to the sentiment analysis improvement phase.
+The initial configuration, **Mistral 7B Instruct v0.2 with Few-Shot Prompting**, delivered a reliable multi-class sentiment analysis at **33.3% accuracy** when summaries were not included in the prompt. After re-evaluating with summaries included, the final configuration delivers a reliable multi-class sentiment analysis at **36.7% accuracy**. Given the constraints of a local, small-scale LLM, this improved result marks a successful conclusion to the sentiment analysis improvement phase.
 
 ## 5. Lessons Learned & Business Application
 
@@ -360,17 +372,17 @@ These instructions use the `rtuszik/photon-docker` image and download a larger d
 
 For quicker setup and testing, especially during development or hackathons, you can use a smaller dataset. This option uses the `photondocker/photon-ch:latest` image, which contains Swiss data but is generally sufficient for testing the geocoding functionality.
 
-1.  **Photon Dockerイメージの取得と起動 (Get and Start Photon Docker Image):**
-    このコマンドは、Photonの最新イメージをダウンロードし、ポート2322でサーバーを起動します。
+1.  **Get and Start Photon Docker Image:**
+    This command downloads the latest Photon image and starts the server on port 2322.
     ```bash
     docker run -d --name photon -p 2322:2322 -v $(pwd)/photon_data:/var/lib/photon:z photondocker/photon-ch:latest
     ```
-    **コマンドの解説 (Command Explanation):**
-    *   `docker run -d`: コンテナをデタッチモード（バックグラウンド）で実行します。
-    *   `--name photon`: コンテナに `photon` という名前を付けます。
-    *   `-p 2322:2322`: ホストPCのポート2322とコンテナのポート2322をマッピングします。`geocode_api.py`がこのポートに接続します。
-    *   `-v $(pwd)/photon_data:/var/lib/photon:z`: データを永続化するためのボリュームを設定します。初めて実行すると、現在のディレクトリに `photon_data` フォルダが作成され、OpenStreetMapデータがダウンロードされます。
-    *   `photondocker/photon-ch:latest`: 使用するPhotonイメージです。`:ch` はスイスのデータを意味しますが、他の地域のデータよりも小さく、テスト用途で広く使われます。
+    **Command Explanation:**
+    *   `docker run -d`: Runs the container in detached mode (in the background).
+    *   `--name photon`: Assigns the name `photon` to the container.
+    *   `-p 2322:2322`: Maps port 2322 of the host PC to port 2322 of the container. `geocode_api.py` connects to this port.
+    *   `-v $(pwd)/photon_data:/var/lib/photon:z`: Configures a volume for data persistence. The first time it runs, a `photon_data` folder is created in the current directory, and OpenStreetMap data is downloaded.
+    *   `photondocker/photon-ch:latest`: The Photon image to use. `:ch` signifies Swiss data, which is smaller than other regional data and widely used for testing purposes.
 
 #### Common Steps for Both Options:
 
@@ -388,14 +400,14 @@ For quicker setup and testing, especially during development or hackathons, you 
     docker stop photon
     ```
 
-**注意 (Note):** `photon-ch` イメージでも、ニュージーランドの地名（クライストチャーチ、ライッテルトンなど）は広域地名として検索できることが多いですが、正確なジオコーディングが必要な場合は、より大規模なデータセット（例: `rtuszik/photon-docker:latest`）を使用するか、データボリュームを手動で設定する必要があります。このプロジェクトのデモ用途であれば、`photon-ch`で問題ありません。
+**Note:** Even with the `photon-ch` image, New Zealand place names (like Christchurch, Lyttelton, etc.) can often be found as major locations. However, for precise geocoding, you should use a larger dataset (e.g., `rtuszik/photon-docker:latest`) or manually configure the data volume. For the demonstration purposes of this project, `photon-ch` is sufficient.
 
 **🚀 Next Step:**
-Photonがポート2322で起動したら、次の手順に進みます。別のターミナルを開き、`geocode_api.py` を起動します。
+Once Photon is running on port 2322, proceed to the next step. Open another terminal and start `geocode_api.py`.
 ```bash
 python geocode_api.py
 ```
-ログに `Starting local geocoding server on http://127.0.0.1:5001` と表示されれば成功です。
+If the log shows `Starting local geocoding server on http://127.0.0.1:5001`, it is successful.
 
 ### Alternative: Local LLM Setup with Ollama and LM Studio (Hybrid Configuration)
 
@@ -439,6 +451,21 @@ By integrating Ollama (for local model serving) with LM Studio (as an OpenAI-com
     OPENAI_API_KEY=sk-dummy
     ```
     This satisfies the SDK's requirement without needing a real OpenAI key.
+
+#### LLM Configuration Details
+
+The `.env` file (or environment variables) for the local LLM setup typically includes:
+
+-   **`GEMINI_API_URL="http://localhost:1234/v1/chat/completions"`**
+    *   **Purpose:** This URL directs API requests to your local LM Studio (or Ollama) inference server. LM Studio provides an OpenAI-compatible API endpoint, allowing the application to interact with a locally hosted LLM as if it were an external service. This is central to the project's philosophy of local execution, cost reduction, and data privacy.
+    *   **Note:** The specific IP address and port (`localhost:1234` is used as an example here) might vary based on your LM Studio/Ollama configuration and network setup. You should configure this to match the address and port where your local LLM server is running.
+
+-   **`GEMINI_API_KEY="sk-lmstudio-dummy"`**
+    *   **Purpose:** This is a dummy API key. While interacting with a local server, some LLM client libraries (like the OpenAI Python client) still expect an API key to be present. Providing a dummy value satisfies this requirement without needing a valid, paid API key, reinforcing the project's commitment to local and cost-free operation.
+
+-   **`MODEL="mistral-7b-instruct-v0.2"`**
+    *   **Purpose:** This specifies the particular LLM model used for tasks like sentiment analysis and response generation.
+    *   **Why it was chosen:** As detailed in the "Evaluation Results" section, `Mistral 7B Instruct v0.2` was selected after rigorous benchmarking. It demonstrated superior instruction-following capabilities and successfully resolved critical biases observed in other models (Llama 3, Gemma), achieving the highest accuracy in multi-class sentiment classification. Its balance of performance and resource efficiency makes it ideal for local deployment.
 
 ### Installation
 
@@ -533,14 +560,14 @@ Once all backend services (Photon, AI Model, `geocode_api.py`, and the main Node
 1.  **Install Frontend Dependencies (One-time Setup)**:
     If you haven't already, install the frontend dependencies. This is typically done once or when `package.json` changes.
     ```bash
-    cd "C:\Level 5\Hackthon_AI_ChatBot\chatbot-ui"
+    cd "/c/Level 5/Hackthon_AI_ChatBot/chatbot-ui"
     npm install
     ```
 
 2.  **Start Frontend Development Server**:
     Open a **new terminal** and run the following commands:
     ```bash
-    cd "C:\Level 5\Hackthon_AI_ChatBot\chatbot-ui"
+    cd "/c/Level 5/Hackthon_AI_ChatBot/chatbot-ui"
     npm run dev
     ```
     *(Leave this terminal running.)*
